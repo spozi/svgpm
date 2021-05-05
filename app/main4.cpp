@@ -198,9 +198,10 @@ int main(int argc, char ** argv)
 {
 	int generation = 0;
 	int population = 0;
-	double C = 0;
-	double gamma = 0;
+	double C = 1;
+	double gamma = 1;
 	bool l1 = true;
+	bool l2 = false;
 	bool costSensitive = false;
 	std::string trainingFile;
 	std::string validationFile;
@@ -253,11 +254,13 @@ int main(int argc, char ** argv)
 				} 
 				else if (string(argv[i]) == "-c") 
 				{
+					//SVM Parameter C
 					C = atof(argv[i + 1]);
 					//std::cout << C << "\n";
 				} 
 				else if (string(argv[i]) == "-g") 
 				{
+					//SVM RBF Parameter gamma
 					gamma = atof(argv[i + 1]);
 					//std::cout << gamma << "\n";
 				}
@@ -268,10 +271,12 @@ int main(int argc, char ** argv)
 				else if(string(argv[i]) == "-l1")
 				{
 					l1 = true;
+					l2 = false;
 				}
 				else if(string(argv[i]) == "-l2")
 				{
 					l1 = false;
+					l2 = true;
 				}
 		}
 	}
@@ -282,7 +287,7 @@ int main(int argc, char ** argv)
 	if(wholeDataset)
 	{
 		resultFile = datasetFile + "_C_" + std::to_string(C) + "_g_" + std::to_string(gamma) +".result";
-		int folds = 10;
+		int folds = 10;	//Set to 10-fold cross validation
 		Data<RealVector> dataset;
 		importCSV(dataset, datasetFile, ',','#',shark::Data<RealVector>::DefaultBatchSize, 1);
 		std::cout << datasetFile << "\nNumber of Generation: "  << generation << " Population Size: " <<  population   << "\n";
