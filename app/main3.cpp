@@ -97,11 +97,11 @@ ClassificationDataset makeLabeledData(Data<RealVector> &dataset, bool normalize)
 	ClassificationDataset normalizedData = createLabeledDataFromRange(inputs, labels);
 	normalizedData.makeIndependent();
 
-	bool removeMean = true;
-	NormalizeComponentsUnitInterval<RealVector> normalizingTrainer;
-	Normalizer<RealVector> normalizer;
-	normalizingTrainer.train(normalizer, normalizedData.inputs());
-	normalizedData = transformInputs(normalizedData, normalizer);
+	// bool removeMean = true;
+	// NormalizeComponentsUnitInterval<RealVector> normalizingTrainer;
+	// Normalizer<RealVector> normalizer;
+	// normalizingTrainer.train(normalizer, normalizedData.inputs());
+	// normalizedData = transformInputs(normalizedData, normalizer);
 	return normalizedData;
 }
 
@@ -239,7 +239,7 @@ int main(int argc, char ** argv)
 
 	if(wholeDataset)
 	{
-		int folds = 10;
+		// int folds = 10; //Folds is set to 3
 		Data<RealVector> dataset;
 		importCSV(dataset, datasetFile, ',','#',shark::Data<RealVector>::DefaultBatchSize, 1);
 		std::cout << datasetFile << " Number of Generation: "  << generation << " Population Size: " <<  population   << "\n";
