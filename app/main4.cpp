@@ -12,80 +12,95 @@
 
 using namespace std;
 
-void writeDataToFile(ClassificationDataset &dataset, std::string &filename)
-{
-	std::ofstream ofs(filename);
-	ofs << dataset;
-	ofs.close();
-}
+// void writeDataToFile(ClassificationDataset &dataset, std::string &filename)
+// {
+// 	std::ofstream ofs(filename);
+// 	ofs << dataset;
+// 	ofs.close();
+// }
 
 void WriteResultToFile(std::string filename, BinaryConfusionMatrix& confusionMatrix)
 {
 	std::ofstream ofs;
 	ofs.open (filename, std::ofstream::out | std::ofstream::app);
 
-	ofs << confusionMatrix.powerC		<< "\t"		<< confusionMatrix.powerGamma	<< "\t"		<<  confusionMatrix.TP	<< "\t" << confusionMatrix.FP << "\n";
+	ofs << confusionMatrix.powerC	<< "\t"		<< confusionMatrix.powerGamma	<< "\t"		<<  confusionMatrix.TP	<< "\t" << confusionMatrix.FP << "\n";
 	ofs <<  "\t\t"																			<<  confusionMatrix.FN  << "\t" << confusionMatrix.TN << "\n";
 
 	ofs.close();
 }
 
-void WriteResultToFile(std::string filename, std::vector<BinaryConfusionMatrix>& confusionMatrix)
-{
-	std::ofstream ofs;
-	ofs.open (filename, std::ofstream::out | std::ofstream::app);
+// void WriteResultToFile(std::string filename, std::vector<BinaryConfusionMatrix>& confusionMatrix)
+// {
+// 	std::ofstream ofs;
+// 	ofs.open (filename, std::ofstream::out | std::ofstream::app);
 
-	for(int i = 0; i < confusionMatrix.size(); ++i)
-	{
-		ofs << /*confusionMatrix[i].powerC << "\t" << confusionMatrix[i].powerGamma << "\t" <<*/ confusionMatrix[i].TP << "\t" << confusionMatrix[i].FP << "\n";
-		ofs	<</*						        "\t" <<                                  "\t" <<*/ confusionMatrix[i].FN << "\t" << confusionMatrix[i].TN << "\n";
-	}	
+// 	for(int i = 0; i < confusionMatrix.size(); ++i)
+// 	{
+// 		ofs << /*confusionMatrix[i].powerC << "\t" << confusionMatrix[i].powerGamma << "\t" <<*/ confusionMatrix[i].TP << "\t" << confusionMatrix[i].FP << "\n";
+// 		ofs	<</*						        "\t" <<                                  "\t" <<*/ confusionMatrix[i].FN << "\t" << confusionMatrix[i].TN << "\n";
+// 	}	
 
-	ofs.close();
-}
+// 	ofs.close();
+// }
 
-void WriteDerivedFeaturesToFile(std::string filename, BinaryConfusionMatrix& confusionMatrix)
-{
-	std::ofstream ofs;
-	ofs.open (filename, std::ofstream::out | std::ofstream::app);
+	// void printBestGPFeatures(BinaryConfusionMatrix& confusionMatrix)
+	// {
+	// 	// std::cout << *confusionMatrix.DerivedFeatures;
+	// 	// std::vector<Tree> bestFeatures = confusionMatrix.DerivedFeatures;
+	// 	// std::cout << "Tree length: " << bestFeatures.size();
+	// 	// for(int j = 0; j < bestFeatures.size(); ++j)
+	// 	// {
+	// 	// 	std::cout << bestFeatures[j] << "\t";
+	// 	// 	// if(bestFeatures[j].mFitness != 0)
+	// 	// 	// {
+				
+	// 	// 	// }
+	// 	// }
+	// }
 
-	std::vector<Tree> bestFeatures = confusionMatrix.DerivedFeatures;
-	for(int j = 0; j < bestFeatures.size(); ++j)
-	{
-		if(bestFeatures[j].mFitness != 0)
-		{
-			ofs << bestFeatures[j];
-			if(j != bestFeatures.size() - 1)
-				ofs << "\t\t"; 
-		}
-	}
-	ofs << "\n";
-	ofs.close();
-}
+// void WriteDerivedFeaturesToFile(std::string filename, BinaryConfusionMatrix& confusionMatrix)
+// {
+// 	std::ofstream ofs;
+// 	ofs.open (filename, std::ofstream::out | std::ofstream::app);
 
-void WriteDerivedFeaturesToFile(std::string filename, std::vector<BinaryConfusionMatrix> & confusionMatrix)
-{
-	std::ofstream ofs;
-	ofs.open (filename, std::ofstream::out | std::ofstream::app);
+// 	std::vector<Tree> bestFeatures = confusionMatrix.DerivedFeatures;
+// 	for(int j = 0; j < bestFeatures.size(); ++j)
+// 	{
+// 		if(bestFeatures[j].mFitness != 0)
+// 		{
+// 			ofs << bestFeatures[j];
+// 			if(j != bestFeatures.size() - 1)
+// 				ofs << "\t\t"; 
+// 		}
+// 	}
+// 	ofs << "\n";
+// 	ofs.close();
+// }
+
+// void WriteDerivedFeaturesToFile(std::string filename, std::vector<BinaryConfusionMatrix> & confusionMatrix)
+// {
+// 	std::ofstream ofs;
+// 	ofs.open (filename, std::ofstream::out | std::ofstream::app);
 	
 	
-	for(int i = 0; i < confusionMatrix.size(); ++i)
-	{
-		//ofs << confusionMatrix[i].DerivedFeatures.size();
-		std::vector<Tree> bestFeatures = confusionMatrix[i].DerivedFeatures;
-		for(int j = 0; j < bestFeatures.size(); ++j)
-		{
-			if(bestFeatures[j].mFitness != 0)
-			{
-				ofs << bestFeatures[j];
-				if(j != bestFeatures.size() - 1)
-					ofs << "\t\t"; 
-			}
-		}
-		ofs << "\n";
-	}
-	ofs.close();
-}
+// 	for(int i = 0; i < confusionMatrix.size(); ++i)
+// 	{
+// 		//ofs << confusionMatrix[i].DerivedFeatures.size();
+// 		std::vector<Tree> bestFeatures = confusionMatrix[i].DerivedFeatures;
+// 		for(int j = 0; j < bestFeatures.size(); ++j)
+// 		{
+// 			if(bestFeatures[j].mFitness != 0)
+// 			{
+// 				ofs << bestFeatures[j];
+// 				if(j != bestFeatures.size() - 1)
+// 					ofs << "\t\t"; 
+// 			}
+// 		}
+// 		ofs << "\n";
+// 	}
+// 	ofs.close();
+// }
 
 ClassificationDataset makeLabeledData(Data<RealVector> &dataset, bool normalize) //Make labeled data from unlabeled data
 {
@@ -282,12 +297,12 @@ int main(int argc, char ** argv)
 	}
 
 	std::cout << "\nC: " << C << "\nGamma: " << gamma << "\nL1: " << l1 <<"\n";
-	BinaryConfusionMatrix temp(C, gamma);
+	BinaryConfusionMatrix cfMatrix(C, gamma);
 	std::string resultFile = "";
 	if(wholeDataset)
 	{
-		resultFile = datasetFile + "_C_" + std::to_string(C) + "_g_" + std::to_string(gamma) +".result";
-		int folds = 10;	//Set to 10-fold cross validation
+		resultFile = datasetFile + "_C_" + std::to_string(C) + "_g_" + std::to_string(gamma) + "_l1_" + std::to_string(l1) +  + "_l2_" + std::to_string(l2) + "_cs_" +  std::to_string(costSensitive) + ".result";
+		// int folds = 10;	//Set to 10-fold cross validation #This is already set in the main file
 		Data<RealVector> dataset;
 		importCSV(dataset, datasetFile, ',','#',shark::Data<RealVector>::DefaultBatchSize, 1);
 		std::cout << datasetFile << "\nNumber of Generation: "  << generation << " Population Size: " <<  population   << "\n";
@@ -318,13 +333,15 @@ int main(int argc, char ** argv)
 			{
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,gamma));
 				CSvmTrainer<RealVector> svm(&rbfKernel, total_pos * std::pow(2,C), total_neg * std::pow(2,C), true);
-				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
+				GPSVMGM gpsvm(dataset_labeled, svm, cfMatrix, generation, population);
+				// printBestGPFeatures(cfMatrix);
 			}
 			else
 			{
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,gamma));
 				SquaredHingeCSvmTrainer<RealVector> svm(&rbfKernel, total_pos * std::pow(2,C), total_neg * std::pow(2,C), true);
-				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
+				GPSVMGM gpsvm(dataset_labeled, svm, cfMatrix, generation, population);
+				// printBestGPFeatures(cfMatrix);
 			}
 		}
 		else if(!costSensitive)
@@ -333,13 +350,15 @@ int main(int argc, char ** argv)
 			{
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,gamma));
 				CSvmTrainer<RealVector> svm(&rbfKernel, std::pow(2,C), true);
-				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
+				GPSVMGM gpsvm(dataset_labeled, svm, cfMatrix, generation, population);
+				// printBestGPFeatures(cfMatrix);
 			}
 			else
 			{
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,gamma));
 				SquaredHingeCSvmTrainer<RealVector> svm(&rbfKernel, std::pow(2,C), true);
-				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
+				GPSVMGM gpsvm(dataset_labeled, svm, cfMatrix, generation, population);
+				// printBestGPFeatures(cfMatrix);
 			}
 		}
 	}
@@ -391,13 +410,15 @@ int main(int argc, char ** argv)
 			{
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,gamma));
 				CSvmTrainer<RealVector> svm(&rbfKernel, total_pos * std::pow(2,C), total_neg * std::pow(2,C), true);
-				GPSVMGM gpsvm(training_dataset_labeled, testing_dataset_labeled, svm, temp, generation, population);
+				GPSVMGM gpsvm(training_dataset_labeled, testing_dataset_labeled, svm, cfMatrix, generation, population);
+				// printBestGPFeatures(cfMatrix);
 			}
 			else
 			{
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,gamma));
 				SquaredHingeCSvmTrainer<RealVector> svm(&rbfKernel, total_pos * std::pow(2,C), total_neg * std::pow(2,C), true);
-				GPSVMGM gpsvm(training_dataset_labeled, testing_dataset_labeled, svm, temp, generation, population);
+				GPSVMGM gpsvm(training_dataset_labeled, testing_dataset_labeled, svm, cfMatrix, generation, population);
+				// printBestGPFeatures(cfMatrix);
 			}
 		}
 		else if(!costSensitive)
@@ -406,18 +427,21 @@ int main(int argc, char ** argv)
 			{
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,gamma));
 				CSvmTrainer<RealVector> svm(&rbfKernel, std::pow(2,C), true);
-				GPSVMGM gpsvm(training_dataset_labeled, testing_dataset_labeled, svm, temp, generation, population);
+				GPSVMGM gpsvm(training_dataset_labeled, testing_dataset_labeled, svm, cfMatrix, generation, population);
+				// printBestGPFeatures(cfMatrix);
 			}
 			else
 			{
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,gamma));
 				SquaredHingeCSvmTrainer<RealVector> svm(&rbfKernel, std::pow(2,C), true);
-				GPSVMGM gpsvm(training_dataset_labeled, testing_dataset_labeled, svm, temp, generation, population);
+				GPSVMGM gpsvm(training_dataset_labeled, testing_dataset_labeled, svm, cfMatrix, generation, population);
+				// printBestGPFeatures(cfMatrix);
 			}
 		}
 	}
-	WriteResultToFile(resultFile, temp);
-	std::string featureFile = trainingFile + "_C_" + std::to_string(C) + "_g_" + std::to_string(gamma)  + ".feature";
-	WriteDerivedFeaturesToFile(featureFile, temp);
+	WriteResultToFile(resultFile, cfMatrix);
+	
+	// std::string featureFile = trainingFile + "_C_" + std::to_string(C) + "_g_" + std::to_string(gamma)  + ".feature";
+	// WriteDerivedFeaturesToFile(featureFile, temp);
 	return 0;
 }

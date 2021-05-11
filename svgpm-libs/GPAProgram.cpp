@@ -152,6 +152,7 @@ double GPAProgram::evaluateGPAttribute(shark::ClassificationDataset &dataset, sh
 
 	//Decision Tree	(Feature Selection)
 	shark::CARTTrainer CART;
+	CART.setNumberOfFolds(1);	//Just set one fold only
 	shark::CARTClassifier<shark::RealVector> CARTModel;
 
 	CART.train(CARTModel, GPClassificationData);

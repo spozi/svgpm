@@ -15,7 +15,7 @@ if(Boost_FOUND)
     include_directories(${BOOST_ROOT})
     include_directories(${Boost_INCLUDE_DIRS})
     link_directories(${Boost_LIBRARY_DIRS})
-    add_executable(svgpm main4.cpp)
+    add_executable(svgpm main3.cpp) #Main file
     target_link_libraries(${PROJECT_NAME} PRIVATE svgpm-libs ${Boost_LIBRARIES} OpenMP::OpenMP_CXX ${ATLAS_LIBRARY} ${CBLAS_LIBRARY}) 
 endif()
 
