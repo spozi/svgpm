@@ -22,8 +22,8 @@ void WriteResultToFile(std::string filename, BinaryConfusionMatrix& confusionMat
 	std::ofstream ofs;
 	ofs.open (filename, std::ofstream::out | std::ofstream::app);
 
-	ofs << confusionMatrix.TP << "\t" << confusionMatrix.FP << "\n";
-	ofs << confusionMatrix.FN << "\t" << confusionMatrix.TN << "\n";
+	ofs << confusionMatrix.powerC << "\t" << confusionMatrix.powerGamma << "\t" << confusionMatrix.TP << "\t" << confusionMatrix.FP << "\n";
+	ofs << "\t\t" << confusionMatrix.FN << "\t" << confusionMatrix.TN << "\n";
 
 	ofs.close();
 }
@@ -35,8 +35,8 @@ void WriteResultToFile(std::string filename, std::vector<BinaryConfusionMatrix>&
 
 	for(int i = 0; i < confusionMatrix.size(); ++i)
 	{
-		ofs << /*confusionMatrix[i].powerC << "\t" << confusionMatrix[i].powerGamma << "\t" <<*/ confusionMatrix[i].TP << "\t" << confusionMatrix[i].FP << "\n";
-		ofs	<</*						        "\t" <<                                  "\t" <<*/ confusionMatrix[i].FN << "\t" << confusionMatrix[i].TN << "\n";
+		ofs << confusionMatrix[i].powerC << "\t" << confusionMatrix[i].powerGamma << "\t" << confusionMatrix[i].TP << "\t" << confusionMatrix[i].FP << "\n";
+		ofs	<<"\t\t" << confusionMatrix[i].FN << "\t" << confusionMatrix[i].TN << "\n";
 	}	
 
 	ofs.close();
@@ -297,6 +297,8 @@ int main(int argc, char ** argv)
 				CSvmTrainer<RealVector> svm(&rbfKernel, std::pow(2,i), true);
 				BinaryConfusionMatrix temp(i, j);
 				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
+				temp.powerC = i;
+				temp.powerGamma = j;
 				ConfusionMatrix.push_back(temp);
 			}
 		}
@@ -318,6 +320,8 @@ int main(int argc, char ** argv)
 				CSvmTrainer<RealVector> svm(&rbfKernel, total_pos * std::pow(2,i), total_neg * std::pow(2,i), true);
 				BinaryConfusionMatrix temp(i, j);
 				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
+				temp.powerC = i;
+				temp.powerGamma = j;
 				ConfusionMatrix.push_back(temp);
 			}
 		}
@@ -338,6 +342,8 @@ int main(int argc, char ** argv)
 				SquaredHingeCSvmTrainer<RealVector> svm(&rbfKernel, std::pow(2,i), true);
 				BinaryConfusionMatrix temp(i, j);
 				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
+				temp.powerC = i;
+				temp.powerGamma = j;
 				ConfusionMatrix.push_back(temp);
 			}
 		}
@@ -359,6 +365,8 @@ int main(int argc, char ** argv)
 				SquaredHingeCSvmTrainer<RealVector> svm(&rbfKernel, total_pos * std::pow(2,i), total_neg * std::pow(2,i), true);
 				BinaryConfusionMatrix temp(i, j);
 				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
+				temp.powerC = i;
+				temp.powerGamma = j;
 				ConfusionMatrix.push_back(temp);
 			}
 		}

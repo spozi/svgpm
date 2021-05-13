@@ -27,7 +27,7 @@ GPSVMGM::GPSVMGM(ClassificationDataset& dataset, CSvmTrainer<RealVector> &svm, B
 	InitGPSVMGM();
 	std::cout << "Training\n";
 	//EvolveGPSVMGM();
-	BuildAndEvaluateModelCV(m_LabeledDataset, 3, confusion); 	//Using 3 fold cross validation
+	BuildAndEvaluateModelCV(m_LabeledDataset, 5, confusion); 	//Using 3 fold cross validation
 }
 
 GPSVMGM::GPSVMGM(ClassificationDataset& dataset, SquaredHingeCSvmTrainer<RealVector> &svm, BinaryConfusionMatrix &confusion, int generations, int populationsize) : m_L1SVM(nullptr), m_L2SVM(&svm)
@@ -52,7 +52,7 @@ GPSVMGM::GPSVMGM(ClassificationDataset& dataset, SquaredHingeCSvmTrainer<RealVec
 	InitGPSVMGM();
 	std::cout << "Training\n";
 	//EvolveGPSVMGM();
-	BuildAndEvaluateModelCV(m_LabeledDataset, 3, confusion);	//Using 3 fold cross validation
+	BuildAndEvaluateModelCV(m_LabeledDataset, 5, confusion);	//Using 3 fold cross validation
 }
 
 
@@ -184,9 +184,6 @@ std::vector<Tree> GPSVMGM::getBestPopulation()
 	return BestIndividuals;
 
 }
-
-
-
 
 
 //The following functions would be refactored
