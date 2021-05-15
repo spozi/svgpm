@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import subprocess
 import sys
 import os
@@ -8,7 +10,7 @@ from multiprocessing import Pool
 
 
 cwd = os.getcwd()
-file_name = os.path.join(cwd, "experiment.param") 
+file_name = os.path.join(cwd, "experiment3.param") 
 
 #1. Parameter files
 with open(file_name) as f:

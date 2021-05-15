@@ -1,0 +1,11 @@
+-gen	100	-p	100	-ds  abalone.csv
+-gen	100	-p	100	-ds  mammography.csv
+-gen	100	-p	100	-ds  optical_digits.csv
+-gen	100	-p	100	-ds  pen_digits.csv
+-gen	100	-p	100	-ds  wine_quality.csv
+-gen	100	-p	100	-ds  yeast_ml8.csv
+-gen	100	-p	100	-ds  fertility.csv
+-gen	100	-p	100	-ds  glass4.csv
+-gen	100	-p	100	-ds  glass5.csv
+-gen	100	-p	100	-ds  iris2.csv
+-gen	100	-p	100	-ds  page-blocks_3.csv
