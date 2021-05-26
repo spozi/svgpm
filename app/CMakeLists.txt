@@ -15,8 +15,16 @@ if(Boost_FOUND)
     include_directories(${BOOST_ROOT})
     include_directories(${Boost_INCLUDE_DIRS})
     link_directories(${Boost_LIBRARY_DIRS})
-    add_executable(svgpm main3.cpp) #Main file
-    target_link_libraries(${PROJECT_NAME} PRIVATE svgpm-libs ${Boost_LIBRARIES} OpenMP::OpenMP_CXX ${ATLAS_LIBRARY} ${CBLAS_LIBRARY}) 
+    file(GLOB APP_SOURCES *.cpp )
+    foreach( testsourcefile ${APP_SOURCES} )
+        get_filename_component(testname ${testsourcefile} NAME_WE)
+        # string( REPLACE ".cpp" "" testname ${testnamefile})
+        add_executable( ${testname} ${testsourcefile} )
+        target_link_libraries( ${testname} PRIVATE svgpm-libs ${Boost_LIBRARIES} OpenMP::OpenMP_CXX ${ATLAS_LIBRARY} ${CBLAS_LIBRARY})
+    endforeach( testsourcefile ${APP_SOURCES} )
+    # add_executable(svgpm main3.cpp) #main3.cpp is the svgpm file #main_gsvm.cpp is the gsvm file
+    # add_executable(gsvm main_gsvm.cpp) #main3.cpp is the svgpm file #main_gsvm.cpp is the gsvm file
+    # target_link_libraries(${file} PRIVATE svgpm-libs ${Boost_LIBRARIES} OpenMP::OpenMP_CXX ${ATLAS_LIBRARY} ${CBLAS_LIBRARY}) 
 endif()
 
 

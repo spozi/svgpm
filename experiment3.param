@@ -1,1 +1,1 @@
--gen	100	-p	100	-ds  yeast_ml8.csv
+-gen    100	-p	100	-ds  wine_quality.csv
