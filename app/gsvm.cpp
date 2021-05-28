@@ -134,7 +134,7 @@ int main(int argc, char ** argv)
 		}
 	}
 
-	int folds = 10;
+	int folds = 5;
 	Data<RealVector> trainingDataset, testingDataset;
 	importCSV(trainingDataset, trainingFile, ',', '#', shark::Data<RealVector>::DefaultBatchSize, 1);
 	importCSV(testingDataset, validationFile, ',', '#', shark::Data<RealVector>::DefaultBatchSize, 1);
