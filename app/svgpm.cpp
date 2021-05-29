@@ -239,7 +239,7 @@ int main(int argc, char ** argv)
 
 	if(wholeDataset)
 	{
-		// int folds = 10; //Folds is set to 3
+		// int folds = 10; //Folds is set to 5
 		Data<RealVector> dataset;
 		importCSV(dataset, datasetFile, ',','#',shark::Data<RealVector>::DefaultBatchSize, 1);
 		std::cout << datasetFile << " Number of Generation: "  << generation << " Population Size: " <<  population   << "\n";

@@ -64,7 +64,214 @@ public:
 //Function prototype
 ClassificationDataset makeLabeledData(Data<RealVector> &dataset, bool normalize);
 ClassificationDataset makeLabeledData(Data<RealVector> &trainingdataset, Data<RealVector> &testingdataset, bool normalize);
+
+
+
 //GSVM
+// double GSVM(ClassificationDataset training, ClassificationDataset testing)
+// {
+
+// 	Data<RealVector> Z_w = kc.decisionFunction()(training.inputs());	//<z,w>
+// }
+
+void GSVM(ClassificationDataset trainingdata, ClassificationDataset testingdata, int C, int gamma)
+{
+
+	std::vector<BinaryConfusionMatrix> result;
+
+	std::string filename = "GSVM_C"/*_+ std::to_string(C)+ "_g_" + std::to_string(gamma) */ + std::string("_GSVM.txt");
+	std::ofstream myfile;
+	myfile.open(filename, ios::app);
+
+	//SVM start here
+	GaussianRbfKernel<RealVector> rbfKernel(std::pow(2, gamma));							//gamma {-4 to 6}
+
+	SquaredHingeCSvmTrainer<RealVector> trainer(&rbfKernel, std::pow(2,C), true); 	//C {-5 to 6}	//Unconstrained or constrained svm are purely computational
+	
+	//Let's try cost-sensitive SVM
+	// CSvmTrainer<RealVector> trainer(&rbfKernel, std::pow(2, C), unconstrained); //C {-5 to 6}
+	//CSvmTrainer<RealVector> trainer(&rbfKernel, total_pos * std::pow(2,C), total_neg * std::pow(2,C), unconstrained); //C {-5 to 6}
+	//trainer.sparsify() = false;
+	
+	KernelClassifier<RealVector> kc;
+
+	BinaryConfusionMatrix ConfusionMatrix;
+	ConfusionMatrix.TP = 0;
+	ConfusionMatrix.FP = 0;
+	ConfusionMatrix.FN = 0;
+	ConfusionMatrix.TN = 0;
+
+	// ClassificationDataset training = trainingdata;
+	// ClassificationDataset validation = testingdata;
+
+	trainer.train(kc, trainingdata);
+
+	//GSVM starts here
+	Data<RealVector> Z_w = kc.decisionFunction()(trainingdata.inputs());	//<z,w>
+
+																		//GSVM Post-processing
+	std::vector<double> Zp_w;
+	Zp_w.clear();
+	std::vector<double> Zn_w;
+	Zn_w.clear();
+
+	for (int k = 0; k < trainingdata.numberOfElements(); ++k)
+	{
+		if (trainingdata.element(k).label == 1)	// Positive class
+			Zp_w.push_back(Z_w.element(k)(0));
+		else if (trainingdata.element(k).label == 0) // Negative class
+			Zn_w.push_back(Z_w.element(k)(0));
+	}
+
+	//myfile << s.element(i)(0) << "\t" << testing_output.element(i) << "\n";
+	double beta = *std::min_element(Zp_w.begin(), Zp_w.end()), beta_star = *std::max_element(Zp_w.begin(), Zp_w.end());
+	double alpha_star = *std::min_element(Zn_w.begin(), Zn_w.end()), alpha = *std::max_element(Zn_w.begin(), Zn_w.end());
+	double lambda = std::max(alpha_star, beta);
+	double theta = std::max(alpha, beta_star);
+
+	//define bm and bM (min)
+
+	//double bm = Zp_w[0];
+	//for(int k = 0; k < Zp_w.size(); ++k)
+	//{
+	//	if((Zp_w[k] > lambda) && (Zp_w[k] <= bm))
+	//		bm = Zp_w[k];
+	//}
+
+	//double bM = Zp_w[0];
+	//for(int k = 0; k < Zp_w.size(); ++k)
+	//{
+	//	if((Zp_w[k] > theta) && (Zp_w[k] <= bM))
+	//		bM = Zp_w[k];
+	//}
+
+	double bm = *std::min_element(Zp_w.begin(), Zp_w.end(), [&lambda](double a, double b)
+	{
+		if (a < b)
+		{
+			if (a > lambda)
+				return a;
+			else if (a >= lambda)
+				return a;
+		}
+		else if ((a <= b))
+		{
+			if (a > lambda)
+				return a;
+			else if (a >= lambda)
+				return a;
+		}
+	});
+
+	double bM = *std::min_element(Zp_w.begin(), Zp_w.end(), [&theta](double a, double b)
+	{
+		if (a < b)
+		{
+			if (a > theta)
+				return a;
+			else if (a >= theta)
+				return a;
+		}
+		else if ((a <= b))
+		{
+			if (a > theta)
+				return a;
+			else if (a >= theta)
+				return a;
+		}
+	});
+
+	double bi = 0.0;
+	double bGSVM = 0.0;
+
+	//Then we define max GM(b_(GSVM))
+	BinaryConfusionMatrix GSVMCFM;
+	GSVMCFM.TP = 0;
+	GSVMCFM.FP = 0;
+	GSVMCFM.FN = 0;
+	GSVMCFM.TN = 0;
+
+	double maxGM = 0.0;
+	for (int k = 0; k < Zp_w.size(); ++k)
+	{
+		if (alpha < beta)
+		{
+			bGSVM = (alpha + beta) / 2.0;
+		}
+		else if (alpha >= beta)
+		{
+			if ((Zp_w[k] >= bm) && (Zp_w[k] <= bM))
+			{
+				bi = Z_w.element(k)[0];
+				for (int l = 0; l < Z_w.numberOfElements(); ++l)
+				{
+					int gsvmLabel = ((Z_w.element(l)[0] + bi) >= 0 ? 1 : 0);
+
+					if (gsvmLabel == 0 && trainingdata.element(l).label == 0)
+					{
+						++GSVMCFM.TN;
+					}
+					if (gsvmLabel == 0 && trainingdata.element(l).label != 0)
+					{
+						++GSVMCFM.FN; //if actual is positive, but output is negative, then it is false negative
+					}
+					if (gsvmLabel != 0 && trainingdata.element(l).label == 0)
+					{
+						++GSVMCFM.FP; //if actual is negative, but output is positive, then it is false positive
+					}
+					if (gsvmLabel != 0 && trainingdata.element(l).label != 0)
+					{
+						++GSVMCFM.TP;
+					}
+				}
+			}
+
+			if (GSVMCFM.getGeometricMean() > maxGM)
+			{
+				maxGM = GSVMCFM.getGeometricMean();
+				bGSVM = bi;
+			}
+		}
+	}
+
+	//And for validation set
+	Data<RealVector> validation_w = kc.decisionFunction()(testingdata.inputs());
+
+	//Fisher exact test uhhhh.
+
+	std::string filename1 = "GSVM_C_" + std::to_string(C) + "_g_" + std::to_string(gamma) + std::string("_fisher.txt");
+	std::ofstream myfile1;
+	myfile1.open(filename1);
+	for (int k = 0; k < validation_w.numberOfElements(); ++k)
+	{
+		cout << validation_w.element(k)[0] << " + " << bGSVM << "\n";
+		int gsvmLabel = ((validation_w.element(k)[0] + bGSVM) >= 0 ? 1 : 0);
+
+		// myfile1 << testingdata.element(k).label << "\t" << gsvmLabel << "\n";
+
+		if (gsvmLabel == 0 && testingdata.element(k).label == 0)
+		{
+			++ConfusionMatrix.TN;
+		}
+		else if (gsvmLabel == 0 && testingdata.element(k).label != 0)
+		{
+			++ConfusionMatrix.FN; //if actual is positive, but output is negative, then it is false negative
+		}
+		else if (gsvmLabel != 0 && testingdata.element(k).label == 0)
+		{
+			++ConfusionMatrix.FP; //if actual is negative, but output is positive, then it is false positive
+		}
+		else if (gsvmLabel != 0 && testingdata.element(k).label != 0)
+		{
+			++ConfusionMatrix.TP;
+		}
+	}
+	myfile1.close();
+	myfile << C << "\t " << gamma << "\t" << ConfusionMatrix.TP << "\t" << ConfusionMatrix.FP << "\n\t\t" << ConfusionMatrix.FN << "\t" << ConfusionMatrix.TN << "\n";
+	myfile.close();
+}
+
+
 
 int main(int argc, char ** argv)
 {
@@ -72,10 +279,13 @@ int main(int argc, char ** argv)
 	double gamma = 0;
 	bool l1 = true;
 	bool costSensitive = false;
+	int folds = 2;
 	std::string trainingFile;
 	std::string validationFile;
 	std::string datasetFile;
 	bool wholeDataset = true;
+	bool bias = true;
+	bool unconstrained = true;
 
 	if (argc < 2)
 	{
@@ -106,18 +316,15 @@ int main(int argc, char ** argv)
 			else if (string(argv[i]) == "-ds")
 			{
 				datasetFile = argv[i + 1];
-				//std::cout << datasetFile << "\n";
 				wholeDataset = true;
 			}
 			else if (string(argv[i]) == "-c")
 			{
 				C = atof(argv[i + 1]);
-				//std::cout << C << "\n";
 			}
 			else if (string(argv[i]) == "-g")
 			{
 				gamma = atof(argv[i + 1]);
-				//std::cout << gamma << "\n";
 			}
 			else if (string(argv[i]) == "-cs")
 			{
@@ -131,10 +338,46 @@ int main(int argc, char ** argv)
 			{
 				l1 = false;
 			}
+			else if (string(argv[i]) == "-cv")
+			{
+				folds = atof(argv[i + 1]);
+			}
 		}
 	}
 
-	int folds = 5;
+	//This is for wholedataset, which is going to be split into k-fold dataset
+	Data<RealVector> dataset;
+	importCSV(dataset, datasetFile, ',','#',shark::Data<RealVector>::DefaultBatchSize, 1);
+	
+	//Prepare to make labeled dataset
+	typedef Data<RealVector>::element_range Elements;
+	Elements elementsTraining = dataset.elements();
+	double total_pos = 0;
+	double total_neg = 0;
+	for (Elements::iterator pos = elementsTraining.begin(); pos != elementsTraining.end(); ++pos)
+	{
+		if ((*pos)[pos->size() - 1] != 0)
+		{
+			++total_pos;
+			(*pos)[pos->size() - 1] = 1;
+		}
+		else
+			++total_neg;
+	}
+	ClassificationDataset dataset_labeled = makeLabeledData(dataset, false); //The second option is: True is to normalize the data, false is not. However, this option is useless for now, as data is expected to be normalized.
+	dataset_labeled.makeIndependent();
+	CVFolds<ClassificationDataset> cvfolds = createCVSameSizeBalanced(dataset_labeled, folds);
+	for(int fold = 0; fold != cvfolds.size(); ++fold)
+	{
+		ClassificationDataset training = cvfolds.training(fold);
+		ClassificationDataset testing = cvfolds.validation(fold);
+
+
+
+	}
+
+
+	// This is for training and testing dataset
 	Data<RealVector> trainingDataset, testingDataset;
 	importCSV(trainingDataset, trainingFile, ',', '#', shark::Data<RealVector>::DefaultBatchSize, 1);
 	importCSV(testingDataset, validationFile, ',', '#', shark::Data<RealVector>::DefaultBatchSize, 1);
@@ -172,22 +415,26 @@ int main(int argc, char ** argv)
 	ClassificationDataset testing_dataset_labeled = makeLabeledData(trainingDataset, testingDataset, true);
 	testing_dataset_labeled.makeIndependent();
 
-	bool bias = true;
-	bool unconstrained = true;
 
+
+
+/**************************************SVM/GSVM Start here*******************************************************/
 	std::vector<BinaryConfusionMatrix> result;
 
 	std::string filename = "GSVM_C"/*_+ std::to_string(C)+ "_g_" + std::to_string(gamma) */ + std::string("_GSVM.txt");
 	std::ofstream myfile;
 	myfile.open(filename, ios::app);
 
-	//SVM start here
-	GaussianRbfKernel<RealVector> rbfKernel(std::pow(2, gamma));	//gamma {-4 to 6}
 
-	//SquaredHingeCSvmTrainer<RealVector> trainer(&rbfKernel, std::pow(2,i), unconstrained); //C {-5 to 6}
+
+
+	//SVM start here
+	GaussianRbfKernel<RealVector> rbfKernel(std::pow(2, gamma));							//gamma {-4 to 6}
+
+	SquaredHingeCSvmTrainer<RealVector> trainer(&rbfKernel, std::pow(2,C), unconstrained); 	//C {-5 to 6}
 	
 	//Let's try cost-sensitive SVM
-	CSvmTrainer<RealVector> trainer(&rbfKernel, std::pow(2, C), unconstrained); //C {-5 to 6}
+	// CSvmTrainer<RealVector> trainer(&rbfKernel, std::pow(2, C), unconstrained); //C {-5 to 6}
 																				//CSvmTrainer<RealVector> trainer(&rbfKernel, total_pos * std::pow(2,C), total_neg * std::pow(2,C), unconstrained); //C {-5 to 6}
 
 																				//trainer.sparsify() = false;
@@ -215,9 +462,9 @@ int main(int argc, char ** argv)
 
 	for (int k = 0; k < training.numberOfElements(); ++k)
 	{
-		if (training.element(k).label == 1)
+		if (training.element(k).label == 1)	// Positive class
 			Zp_w.push_back(Z_w.element(k)(0));
-		else if (training.element(k).label == 0)
+		else if (training.element(k).label == 0) // Negative class
 			Zn_w.push_back(Z_w.element(k)(0));
 	}
 
@@ -309,15 +556,15 @@ int main(int argc, char ** argv)
 					{
 						++GSVMCFM.TN;
 					}
-					if (gsvmLabel == 0 && training.element(l).label == 1)
+					if (gsvmLabel == 0 && training.element(l).label != 0)
 					{
 						++GSVMCFM.FN; //if actual is positive, but output is negative, then it is false negative
 					}
-					if (gsvmLabel == 1 && training.element(l).label == 0)
+					if (gsvmLabel != 0 && training.element(l).label == 0)
 					{
 						++GSVMCFM.FP; //if actual is negative, but output is positive, then it is false positive
 					}
-					if (gsvmLabel == 1 && training.element(l).label == 1)
+					if (gsvmLabel != 0 && training.element(l).label != 0)
 					{
 						++GSVMCFM.TP;
 					}
@@ -336,7 +583,6 @@ int main(int argc, char ** argv)
 	Data<RealVector> validation_w = kc.decisionFunction()(validation.inputs());
 
 	//Fisher exact test uhhhh.
-
 	std::string filename1 = "GSVM_C_" + std::to_string(C) + "_g_" + std::to_string(gamma) + std::string("_fisher.txt");
 	std::ofstream myfile1;
 	myfile1.open(filename1);
@@ -351,15 +597,15 @@ int main(int argc, char ** argv)
 		{
 			++ConfusionMatrix.TN;
 		}
-		else if (gsvmLabel == 0 && validation.element(k).label == 1)
+		else if (gsvmLabel == 0 && validation.element(k).label != 0)
 		{
 			++ConfusionMatrix.FN; //if actual is positive, but output is negative, then it is false negative
 		}
-		else if (gsvmLabel == 1 && validation.element(k).label == 0)
+		else if (gsvmLabel != 0 && validation.element(k).label == 0)
 		{
 			++ConfusionMatrix.FP; //if actual is negative, but output is positive, then it is false positive
 		}
-		else if (gsvmLabel == 1 && validation.element(k).label == 1)
+		else if (gsvmLabel != 0 && validation.element(k).label != 0)
 		{
 			++ConfusionMatrix.TP;
 		}
@@ -367,6 +613,8 @@ int main(int argc, char ** argv)
 	myfile1.close();
 	myfile << C << "\t " << gamma << "\t" << ConfusionMatrix.TP << "\t" << ConfusionMatrix.FP << "\n\t\t" << ConfusionMatrix.FN << "\t" << ConfusionMatrix.TN << "\n";
 	myfile.close();
+
+	/**************************************************SVM/GSVM ends here*****************************************************/
 }
 
 ClassificationDataset makeLabeledData(Data<RealVector> &dataset, bool normalize) //Make labeled data from unlabeled data
@@ -390,7 +638,7 @@ ClassificationDataset makeLabeledData(Data<RealVector> &dataset, bool normalize)
 			{
 				if (dataset.element(i)[j] == 0)
 					labels.at(i) = 0;
-				else if (dataset.element(i)[j] == 1)
+				else if (dataset.element(i)[j] != 0)
 					labels.at(i) = 1;
 			}
 			else
