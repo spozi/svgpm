@@ -120,7 +120,7 @@ std::tuple<int,int,int,int> GSVM(ClassificationDataset trainingdata, Classificat
 
 	for (int k = 0; k < trainingdata.numberOfElements(); ++k)
 	{
-		if (trainingdata.element(k).label == 1)	// Positive class
+		if (trainingdata.element(k).label != 0)	// Positive class
 			Zp_w.push_back(Z_w.element(k)(0));
 		else if (trainingdata.element(k).label == 0) // Negative class
 			Zn_w.push_back(Z_w.element(k)(0));
@@ -374,11 +374,13 @@ int main(int argc, char ** argv)
 		ClassificationDataset dataset_labeled = makeLabeledData(dataset, false); //The second option is: True is to normalize the data, false is not. However, this option is not used for now, as data is expected to be normalized.
 		dataset_labeled.makeIndependent();
 		CVFolds<ClassificationDataset> cvfolds = createCVSameSizeBalanced(dataset_labeled, folds);
-		int TP, FP, FN, TN = 0;
+		int TP = 0; int FP = 0; int FN = 0; int TN = 0;
 		for(int fold = 0; fold != cvfolds.size(); ++fold)
 		{
 			ClassificationDataset training = cvfolds.training(fold);
 			ClassificationDataset testing = cvfolds.validation(fold);
+			training.makeIndependent();
+			testing.makeIndependent();
 
 			auto [tp, fp, fn, tn] = GSVM(training, testing, C, gamma);
 			TP += tp;
