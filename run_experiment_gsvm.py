@@ -42,4 +42,5 @@ if __name__ == '__main__':
         results = p.map(execute, param_list_2)
     with open('listresult.txt', 'w') as filehandle:
         for listitem in results:
-            filehandle.write(str(listitem))
+            strtxt = str(listitem[0]) + "\t" + str(listitem[1]) + "\n"
+            filehandle.write(strtxt)
