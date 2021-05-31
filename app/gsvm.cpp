@@ -389,7 +389,7 @@ int main(int argc, char ** argv)
 			TN += tn;
 		}
 
-		std::cout << TP << "\t" << FP << "\n" << FN << "\t" << TN << "\n"; 
+		std::cout << "{TP:" << TP << ",FP:" << FP << ",FN:" << FN << ",TN:" << TN << "}"; 
 	}
 
 /*********************Skip training and testing dataset for now***********************************************/
