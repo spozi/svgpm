@@ -33,6 +33,7 @@ def execute(param):
     dataset = fname[-1]
     # proc = subprocess.call(param, stdout=subprocess.PIPE)
     result_str = subprocess.check_output(param)
+    print(dataset,result_str)
     return (dataset,result_str)
 
 # print(mp.cpu_count())

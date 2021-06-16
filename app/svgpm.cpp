@@ -7,6 +7,8 @@
 #include <fstream>
 #include <list>
 #include <cmath>
+#include <chrono>
+using namespace std::chrono;
 
 using namespace std;
 
@@ -355,14 +357,16 @@ int main(int argc, char ** argv)
 		//resultFile = datasetFile + "GP_l2_acc_CS_svm.result";
 		resultFile = datasetFile + "GP_l2_CS_svm.result";
 	#pragma omp parallel for
-		for(int i = -5; i < 7; ++i)
+		for(int i = -5; i < -4; ++i)
 		{	
 		#pragma omp parallel for
-			for(int j = -4; j < 7; ++j)
+			for(int j = -4; j < -3; ++j)
 			{
 				cout << "Cost Sensitive L2SVM C: 2^" << i << "gamma: 2^" << j << "\n"; 
+				auto start = high_resolution_clock::now();
 				GaussianRbfKernel<RealVector> rbfKernel(std::pow(2,j));
 				SquaredHingeCSvmTrainer<RealVector> svm(&rbfKernel, total_pos * std::pow(2,i), total_neg * std::pow(2,i), true);
+				auto stop = high_resolution_clock::now();
 				BinaryConfusionMatrix temp(i, j);
 				GPSVMGM gpsvm(dataset_labeled, svm, temp, generation, population);
 				temp.powerC = i;
