@@ -34,6 +34,10 @@ class GPSVMGM
 {
 public:
 	//GPSVMGM(void);
+	GPSVMGM(ClassificationDataset& dataset, SquaredHingeCSvmTrainer<RealVector> &svm, BinaryConfusionMatrix &cfm, int generations, int populationsize, int kfold);
+
+
+
 	GPSVMGM(ClassificationDataset& dataset, CSvmTrainer<RealVector> &svm, BinaryConfusionMatrix &cfm, int generations, int populationsize);
 	GPSVMGM(ClassificationDataset& dataset, SquaredHingeCSvmTrainer<RealVector> &svm, BinaryConfusionMatrix &cfm, int generations, int populationsize);
 	GPSVMGM(ClassificationDataset& trainingSet, ClassificationDataset& testingSet, CSvmTrainer<RealVector> &svm, BinaryConfusionMatrix &cfm, int generations, int populationsize);

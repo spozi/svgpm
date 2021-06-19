@@ -5,6 +5,32 @@
 // {
 // }
 
+GPSVMGM::GPSVMGM(ClassificationDataset& dataset, SquaredHingeCSvmTrainer<RealVector> &svm, BinaryConfusionMatrix &confusion, int generations, int populationsize, int kfold) : m_L1SVM(nullptr), m_L2SVM(&svm)
+{
+	m_SVM = 2 ;
+	// std::cout << "Welcome to GPSVMGM\n";
+	m_LabeledDataset = dataset;
+	m_LabeledDataset.makeIndependent();
+	//m_filename = filename;
+	m_TotalNumberOfOriginalAttributes = m_LabeledDataset.element(0).input.size();					//Store the total of original attributes
+
+	m_TotalNumberOfInstances		= m_LabeledDataset.numberOfElements();
+
+	for(int i = 0; i < m_TotalNumberOfInstances; ++i)
+		m_Labels.push_back(m_LabeledDataset.element(i).label);
+
+
+	m_TotalGenerations = generations;
+	m_TotalIndividuals = populationsize;
+
+	std::cout << "Init GPSVMGM\n";
+	InitGPSVMGM();
+	std::cout << "Training\n";
+	//EvolveGPSVMGM();
+	BuildAndEvaluateModelCV(m_LabeledDataset, kfold, confusion);	//Using 5 fold cross validation
+}
+
+
 GPSVMGM::GPSVMGM(ClassificationDataset& dataset, CSvmTrainer<RealVector> &svm, BinaryConfusionMatrix &confusion, int generations, int populationsize) : m_L1SVM(&svm), m_L2SVM(nullptr)
 {
 	m_SVM = 1;
