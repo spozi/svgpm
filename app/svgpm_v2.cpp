@@ -174,7 +174,7 @@ int main(int argc, char ** argv)
     }
 }
 
-BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int generations, int populationsize, int kfold)
+BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int generations, int populationsize, int kfold, int posWeight, int negWeight)
 {
     int TotalNumberOfOriginalAttributes = dataset.element(0).input.size();  //Total original features
     int TotalNumberOfInstances		    = dataset.numberOfElements();       //Total instances we have right now
@@ -185,26 +185,26 @@ BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int
 
     //SVGPM Start here
     //1. Initialization
-    Puppy::Context svgpm_context;
-    svgpm_context.mRandom.seed(1);
-	svgpm_context.insert(new GPAttributePrimitive::Add);
-	svgpm_context.insert(new GPAttributePrimitive::Subtract);
-	svgpm_context.insert(new GPAttributePrimitive::Multiply);
-	svgpm_context.insert(new GPAttributePrimitive::Divide);	
-	svgpm_context.insert(new GPAttributePrimitive::Ln);
-	svgpm_context.insert(new GPAttributePrimitive::SquareRoot);
-	svgpm_context.insert(new GPAttributePrimitive::Power);
-	svgpm_context.insert(new GPAttributePrimitive::Exponent);
-	svgpm_context.insert(new GPAttributePrimitive::ErrorFunction);
-	svgpm_context.insert(new GPAttributePrimitive::Log);
-	svgpm_context.insert(new GPAttributePrimitive::Cosine);
-	svgpm_context.insert(new GPAttributePrimitive::Sine);
-	svgpm_context.insert(new GPAttributePrimitive::Ephemeral);
+    Puppy::Context svgpm_Context;
+    svgpm_Context.mRandom.seed(1);
+	svgpm_Context.insert(new GPAttributePrimitive::Add);
+	svgpm_Context.insert(new GPAttributePrimitive::Subtract);
+	svgpm_Context.insert(new GPAttributePrimitive::Multiply);
+	svgpm_Context.insert(new GPAttributePrimitive::Divide);	
+	svgpm_Context.insert(new GPAttributePrimitive::Ln);
+	svgpm_Context.insert(new GPAttributePrimitive::SquareRoot);
+	svgpm_Context.insert(new GPAttributePrimitive::Power);
+	svgpm_Context.insert(new GPAttributePrimitive::Exponent);
+	svgpm_Context.insert(new GPAttributePrimitive::ErrorFunction);
+	svgpm_Context.insert(new GPAttributePrimitive::Log);
+	svgpm_Context.insert(new GPAttributePrimitive::Cosine);
+	svgpm_Context.insert(new GPAttributePrimitive::Sine);
+	svgpm_Context.insert(new GPAttributePrimitive::Ephemeral);
 	
 	for(int i = 0; i <  TotalNumberOfOriginalAttributes; ++i)
 	{
 		std::string x = std::string("A") + std::to_string(i + 1);
-		svgpm_context.insert(new TokenT<double>(x));
+		svgpm_Context.insert(new TokenT<double>(x));
 	}
     std::vector<Tree> svgpm_Population(populationsize);
 
@@ -229,9 +229,7 @@ BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int
         
         //Evolution start
         //Initialize population
-        Puppy::initializePopulation(svgpm_Population, svgpm_context);
-
-
+        Puppy::initializePopulation(svgpm_Population, svgpm_Context);
 
         std::vector<RealVector> OriginalData;
         std::vector<RealVector> GPData;
@@ -255,7 +253,7 @@ BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int
             //Set the value to each node of GP Tree
             for(unsigned int j = 0; j < Training.element(i).input.size(); ++j)
             {
-                svgpm_context.mPrimitiveMap[std::string("A" + std::to_string(j+1))]->setValue(&(Training.element(i).input(j)));
+                svgpm_Context.mPrimitiveMap[std::string("A" + std::to_string(j+1))]->setValue(&(Training.element(i).input(j)));
             }
 
             for(unsigned int j = 0; j < svgpm_Population.size(); ++j)
@@ -264,7 +262,7 @@ BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int
                         continue;
                 */	
                 double xds = 0.0;
-                svgpm_Population[j].interpret(&xds, svgpm_context);
+                svgpm_Population[j].interpret(&xds, svgpm_Context);
                 //std::cout << xds << "\n";
                 if(__isnan(xds))
                     xds = 0.0;
@@ -274,7 +272,7 @@ BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int
             }
         }
 
-        //Merge original data
+        //1st Merging original data GPData (This can be refactor). Refer to line 365 GPSVMGM.cpp
         std::vector<RealVector> ds;
         ds.resize(OriginalData.size());
         for(int i = 0; i < ds.size(); ++i)
@@ -296,7 +294,6 @@ BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int
         mergedLabeledData.makeIndependent();
 
         //Critical Training the most crucial code, lot days of debugging
-
         //Define CART
         CARTTrainer CART;
         CARTClassifier<RealVector> svgpm_CARTModel;
@@ -331,90 +328,134 @@ BinaryConfusionMatrix SVGPM(ClassificationDataset dataset, int C, int gamma, int
             }
         }
 
-        //Merging and obtaining the GPData based on the best fitness function
-        std::vector<RealVector> OriginalData;
-        std::vector<RealVector> GPFullData;
-        std::vector<RealVector> GPData;
+        //Merging and obtaining the GPData_2 based on the best fitness function
+        std::vector<RealVector> OriginalData_2;
+        std::vector<RealVector> GPFullData_2;
+        std::vector<RealVector> GPData_2;
 
-        OriginalData.resize(mergedLabeledData.numberOfElements());
-        GPFullData.resize(mergedLabeledData.numberOfElements());
-        GPData.resize(mergedLabeledData.numberOfElements());
+        OriginalData_2.resize(mergedLabeledData.numberOfElements());
+        GPFullData_2.resize(mergedLabeledData.numberOfElements());
+        GPData_2.resize(mergedLabeledData.numberOfElements());
+
         for(int i = 0; i < mergedLabeledData.numberOfElements(); ++i)
         {	
-            OriginalData[i].resize(TotalNumberOfOriginalAttributes);
-            GPFullData[i].resize(mergedLabeledData.element(i).input.size());
-            GPData[i].resize(svgpm_Indices.size());
+            OriginalData_2[i].resize(TotalNumberOfOriginalAttributes);
+            GPFullData_2[i].resize(mergedLabeledData.element(i).input.size());
+            GPData_2[i].resize(svgpm_Indices.size());
             for(int j = 0; j < TotalNumberOfOriginalAttributes; ++j)
             {
-                OriginalData[i](j) = mergedLabeledData.element(i).input(j);
+                OriginalData_2[i](j) = mergedLabeledData.element(i).input(j);
             }
 
             for(int j = 0; j < mergedLabeledData.element(i).input.size(); ++j)
             {
-                GPFullData[i](j) = mergedLabeledData.element(i).input(j);
+                GPFullData_2[i](j) = mergedLabeledData.element(i).input(j);
             }
 
             for(unsigned int j = 0; j < svgpm_Indices.size(); ++j)
             {
                 int index = svgpm_Indices[j];
                 //std::cout << "Index: " << index << "\t" <<  labeledDataset.element(i).input.size() << "\t" <<  labeledDataset.element(i).input(index) << "\t" << GPFullData[i](index) << "\n"; 
-                GPData[i][j] = mergedLabeledData.element(i).input(index);
+                GPData_2[i][j] = mergedLabeledData.element(i).input(index);
             }
         }
 
+        //2nd Merging GPData_2  (This can be refactor). Refer to line 365 GPSVMGM.cpp
+        std::vector<RealVector> ds_2;
+        ds_2.resize(OriginalData_2.size());
+        for(int i = 0; i < ds_2.size(); ++i)
+        {
+            ds_2[i].resize(OriginalData_2[i].size() + GPData_2[i].size());
+            //Dataset 1;
+            for(int j = 0; j < OriginalData_2[i].size(); ++j)
+            {
+                ds_2[i](j) = OriginalData_2[i](j);
+            }
+            //Dataset 2;
+            for(int j = 0; j < GPData_2[i].size(); ++j)
+            {
+                ds_2[i](j + OriginalData_2[i].size()) = GPData_2[i](j);
+            }
+
+        }
+
+        ClassificationDataset svgpm_TrainingData = createLabeledDataFromRange(ds_2, TrainingLabels);
+
         //Select the SVM
+        KernelClassifier<RealVector> svgpm_KernelClassifier;
+        GaussianRbfKernel<RealVector> svgpm_rbfKernel(std::pow(2,gamma));
+        SquaredHingeCSvmTrainer<RealVector> svgpm_svm(&svgpm_rbfKernel, posWeight * std::pow(2,C), negWeight * std::pow(2,C), true);
+        svgpm_svm.train(svgpm_KernelClassifier, svgpm_TrainingData);
+
+        //Compute the confusion matrix
+        Data<unsigned int> prediction_output = svgpm_KernelClassifier(svgpm_TrainingData.inputs());
+        BinaryConfusionMatrix confusion;
+        confusion.FN = 0;
+        confusion.FP = 0;
+        confusion.TN = 0;
+        confusion.TP = 0;
+        for(int i = 0; i < prediction_output.numberOfElements(); ++i)
+        {
+            if(svgpm_TrainingData.element(i).label == 0 && prediction_output.element(i) == 0)
+            {
+                ++confusion.TN;
+            }
+            if(svgpm_TrainingData.element(i).label == 0 && prediction_output.element(i) == 1)
+            {
+                ++confusion.FP; //if actual is negative, but output is positive, then it is false positive
+            }			
+            if(svgpm_TrainingData.element(i).label == 1 && prediction_output.element(i) == 0)
+            {
+                ++confusion.FN; //if actual is positive, but output is negative, then it is false negative
+            }			
+            if(svgpm_TrainingData.element(i).label == 1 && prediction_output.element(i) == 1)
+            {
+                ++confusion.TP;
+            }
+        }
+
+        int suppor_vectors_len = svgpm_KernelClassifier.decisionFunction().alpha().size1();	//Number of support vector
+
+        //Evaluation
+        double accuracy = ((double)confusion.TP + (double)confusion.TN) / ((double)confusion.TP + (double)confusion.TN + (double)confusion.FP + (double)confusion.FN);
+        double specificity = (double(confusion.TN) / double(confusion.TN) + double(confusion.FP));
+		double sensitivity = (double(confusion.TP) / double(confusion.TP) + double(confusion.FN));
+        double geometric_mean = std::sqrt(sensitivity * specificity);
         
+        //Fitness Function
+        double pct = std::min(accuracy, geometric_mean) / suppor_vectors_len;
 
+        //Reassign the fitness function that get 1.0
+        for(int i = 0; i < svgpm_Population.size(); ++i)
+        {
+            if(svgpm_Population[i].mFitness == 1.0)
+                svgpm_Population[i].mFitness = pct;
+            else
+                svgpm_Population[i].mFitness = 0.0;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        pct = EvaluatePopulation(Training, TrainingLabels);
-
-        std::vector<Puppy::Tree> svgpm_BestPopulation = svgpm_Population;
-        // std::vector<int> svgpm_BestIndices = 
-        m_BestPopulation	= m_Population;
-        //std::cout << "Best Indices\n";
-        m_BestIndices		= m_Indices;
-        //std::cout << "Best Kernel Classifier\n";
-        m_BestKernelClassifier = m_KernelClassifier;
-        //std::cout << "Best Dataset\n";
-        m_BestDataset		= m_GPLabeledDataset;
-        //std::cout << "Make Independet\n";
-        m_BestDataset.makeIndependent();
-        //std::cout << "CalculateStats\n";
-        //Puppy::calculateStats(m_Population, 0);
-	
+        std::vector<Puppy::Tree> svgpm_BestPopulation           = svgpm_Population;
+        std::vector<int> svgpm_BestIndices		                = svgpm_Indices;
+        KernelClassifier<RealVector> svgpm_BestKernelClassifier = svgpm_KernelClassifier;
+        ClassificationDataset svgpm_BestDataset		            = svgpm_TrainingData;
+        svgpm_BestDataset.makeIndependent();
 	
 	    //Iterations
-        for(unsigned int i=1; i <= m_TotalGenerations; ++i) 
+        for(unsigned int i=1; i <= generations; ++i) 
         {	
             //std::cout << "Selection Start:\n" << m_Population.size() << "\n";
             //if(performanceMetric > 0.0)
-            applySelectionTournament(m_Population, m_Context);
+            applySelectionTournament(svgpm_Population, svgpm_Context);
             //else
             //applySelectionRoulette(m_Population, m_Context);		
             //std::cout << "Selection\n";
-            applyCrossover(m_Population, m_Context);
+            applyCrossover(svgpm_Population, svgpm_Context);
             //std::cout << "Crossover\n";
-            applyMutationStandard(m_Population, m_Context);
+            applyMutationStandard(svgpm_Population, svgpm_Context);
             //std::cout << "Mutation\n";
-            applyMutationSwap(m_Population, m_Context);
+            applyMutationSwap(svgpm_Population, svgpm_Context);
             //std::cout << "Evaluating.. \n";
-            double temp = EvaluatePopulation(labeledDataset, labels);
+            double temp = EvaluatePopulation(svgpm_TrainingData, TrainingLabels);
             if(pct <= temp)
             {
                 pct						= temp;
