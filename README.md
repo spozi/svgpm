@@ -10,6 +10,3 @@ In order to run the program (once it has been built):
             svgpm  -gen    100	-p	100	-ds  wine_quality.csv.  
 
 The program will run for 100 generation (-gen 100), with population 100 (-p 100), on dataset wine_quality.csv (-ds wine_quality.csv) using 5-fold cross-validation.
-
-Related article:
-https://link.springer.com/article/10.1007%2Fs13748-021-00260-4
