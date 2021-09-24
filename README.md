@@ -2,7 +2,7 @@ This is C++ based implementation for SVGPM.
 
 In order to build this program, please install shark machine learning library version 3 into your system https://github.com/Shark-ML/Shark/tree/3.1.1.   
 
-This program has been sucessfully build and run on WSL2 Ubuntu 20.04 Based Distro. 
+This program has been sucessfully built and run on WSL2 Ubuntu 20.04 Based Distro. 
 
 In order to run the program (once it has been built):  
         go to /build/app  
