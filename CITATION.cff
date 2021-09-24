@@ -13,10 +13,7 @@ references:
       - family-names: "Ajrina"
         given-names: "Lina Hazmi"
   title: "SVGPM: evolving SVM decision function by using genetic programming to solve imbalanced classification problem"
-  publisher:
-    - name: Springer 
   journal: "Progress in Artificial Intelligence"
   doi: 10.1007/s13748-021-00260-4
   date-published: 2021-08-21
   year: 2021
-  pages: 1-13
