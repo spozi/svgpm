@@ -1,20 +1,22 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-authors:
-- family-names: " Mohd Pozi"
-  given-names: "Muhammad Syafiq"
-  orcid: "https://orcid.org/0000-0001-9379-7351"
-- family-names: "Azhar"
-  given-names: "Nur Athirah"
-- family-names: "Abdul Raziff"
-  given-names: "Abdul Rafiez"
-- family-names: "Ajrina"
-  given-names: "Lina Hazmi"
-title: "SVGPM: evolving SVM decision function by using genetic programming to solve imbalanced classification problem"
-journal: "Progress in Artificial Intelligence"
-version: 1.0.0
-doi: 10.1007/s13748-021-00260-4
-date-released: 2021-08-21
-year: 2021
-publisher: "Springer"
-pages: 1-13
+references:
+  - type: article
+    authors:
+      - family-names: " Mohd Pozi"
+        given-names: "Muhammad Syafiq"
+        orcid: "https://orcid.org/0000-0001-9379-7351"
+      - family-names: "Azhar"
+        given-names: "Nur Athirah"
+      - family-names: "Abdul Raziff"
+        given-names: "Abdul Rafiez"
+      - family-names: "Ajrina"
+        given-names: "Lina Hazmi"
+  title: "SVGPM: evolving SVM decision function by using genetic programming to solve imbalanced classification problem"
+  publisher:
+    - name: Springer 
+  journal: "Progress in Artificial Intelligence"
+  doi: 10.1007/s13748-021-00260-4
+  date-published: 2021-08-21
+  year: 2021
+  pages: 1-13
