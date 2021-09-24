@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 authors:
-- family-names: " Mohd Pozi"
-  given-names: "Muhammad Syafiq"
+- family-names: "Pozi"
+  given-names: "Muhammad Syafiq Mohd"
   orcid: "https://orcid.org/0000-0001-9379-7351"
 - family-names: "Azhar"
   given-names: "Nur Athirah"
